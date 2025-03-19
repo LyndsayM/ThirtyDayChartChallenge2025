@@ -1,0 +1,22 @@
+---
+title: "day6_nightingale"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+#install dataset from Kaggle
+df <- read_csv("data/Nightingale.csv")
+```
+
