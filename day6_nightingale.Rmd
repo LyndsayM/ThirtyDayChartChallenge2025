@@ -13,10 +13,36 @@ knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
 library(lubridate)
+library(ggplot2)
 ```
 
 ```{r}
 #install dataset from Kaggle
+#source: https://www.kaggle.com/datasets/ukveteran/florence-nightingales-data-on-deaths?resource=download
 df <- read_csv("data/Nightingale.csv")
+```
+
+```{r}
+#show the frequency of Disease vs. Non-Disease cases
+df_clean <- df %>% 
+  select(Date, Disease, Wounds, Other)%>% 
+  pivot_longer(cols= c("Disease", "Wounds", "Other"),
+    names_to = c("Deaths"),
+    values_to = "count")%>%
+  mutate(if_disease = if_else(Deaths == "Disease", "disease", "not disease"))
+```
+
+
+```{r}
+df_clean <- df %>%
+  group_by(month = floor_date(Date, unit = "month")) %>%
+  summarize(avg = sum(Disease))%>% 
+  ungroup()
+
+ggplot(df_clean, aes(x = month, y = avg)) + 
+  geom_bar(stat = "identity") + 
+  scale_x_date(NULL, date_labels = "%b %y", breaks = "month")+
+   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
 ```
 
