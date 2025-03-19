@@ -30,19 +30,24 @@ df_clean <- df %>%
     names_to = c("Deaths"),
     values_to = "count")%>%
   mutate(if_disease = if_else(Deaths == "Disease", "disease", "not disease"))
+
+df_clean_d <- df_clean %>% 
+  group_by(Date, if_disease) %>% 
+  summarize(tot_count = sum(count))
 ```
 
 
 ```{r}
-df_clean <- df %>%
-  group_by(month = floor_date(Date, unit = "month")) %>%
-  summarize(avg = sum(Disease))%>% 
-  ungroup()
+df_clean_d_plot <- df_clean_d %>%
+  group_by(month = floor_date(Date, unit = "month"), if_disease) %>%
+  summarize(tot = sum(tot_count))
 
-ggplot(df_clean, aes(x = month, y = avg)) + 
+ggplot(df_clean_d_plot, aes(x = month, y = tot, fill= if_disease)) + 
   geom_bar(stat = "identity") + 
   scale_x_date(NULL, date_labels = "%b %y", breaks = "month")+
-   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  labs(y = "")+
+  theme_grey()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
 ```
 
