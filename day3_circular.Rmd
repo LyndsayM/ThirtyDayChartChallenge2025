@@ -15,7 +15,7 @@ pkg_themes <- sort(pkg_themes[grepl("^theme\\_", pkg_themes)])
 
 glue::glue("- `{pkg_themes}()`")
 ```
-REWRITE - USING THIS ONE FOR CIRCULAR DAY
+
 ```{r}
 article_dat <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-25/article_dat.csv')
 model_dat <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-25/model_dat.csv')
@@ -80,8 +80,7 @@ ggplot(p1, aes(x="", y=N, fill=reorder(study_type, N))) +
   scale_fill_brewer(palette="Set2")+
   labs(title = "By Study Type: Academic Literature \non Racial and Ethnic Disparities in \nReproductive Medicine in the US",
        subtitle = "30DayChartChallenge Day 1: Fractions",
-       fill = "Study Type")+
-  hrbrthemes::theme_ipsum_pub()
+       fill = "Study Type")
 
 ```
 
