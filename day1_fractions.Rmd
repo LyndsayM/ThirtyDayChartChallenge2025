@@ -9,80 +9,48 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(hrbrthemes)
+library(fontawesome)
 
 pkg_themes <- getNamespaceExports("hrbrthemes")
 pkg_themes <- sort(pkg_themes[grepl("^theme\\_", pkg_themes)])
 
 glue::glue("- `{pkg_themes}()`")
 ```
-REWRITE - USING THIS ONE FOR CIRCULAR DAY
+Fractions: MTG cards
 ```{r}
-article_dat <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-25/article_dat.csv')
-model_dat <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-25/model_dat.csv')
+mtg_cards <- readr::read_csv('data/all_mtg_cards.csv')
+
+mtg_cards <- mtg_cards%>%mutate_if(is.character, as.factor)
 ```
 
 ```{r}
-#what are studies focused on? 
-#how many of these studies specifically addressed disparities? I chose four of the variables to think about this: access_to_care, treatment_received, and health_outcome
-#access_to_care
-access <- article_dat %>% 
-  drop_na(access_to_care) %>%
-  group_by(year, access_to_care) %>% 
-  summarize(num = n())%>%
-  mutate(perc = num/sum(num),
-         focus = "access")%>%
-  filter(access_to_care == '1')%>%
-  select(-access_to_care)
-
-#treatment_received
-tx_rcvd <- article_dat %>% 
-  drop_na(treatment_received) %>%
-  group_by(year, treatment_received) %>% 
-  summarize(num = n())%>%
-  mutate(perc = num/sum(num),
-         focus = "treatment_received")%>%
-  filter(treatment_received == '1')%>%
-  select(-treatment_received)
-
-#health_outcome
-hlth_out <- article_dat %>% 
-  drop_na(health_outcome) %>%
-  group_by(year, health_outcome) %>% 
-  summarize(num = n())%>%
-  mutate(perc = num/sum(num),
-         focus = "health_outcome")%>%
-  filter(health_outcome == '1')%>%
-  select(-health_outcome)
-
-foci <- bind_rows(access, tx_rcvd, hlth_out) %>% 
-  group_by(year)
+p_frac <- mtg_cards %>% group_by(rarity) %>% summarize(totcnt = n()) 
 ```
 
 ```{r}
-p1 <- article_dat %>% 
-  drop_na(study_type)%>%
-  mutate(study_type = tools::toTitleCase(study_type),
-         study_type = factor(study_type))%>%
-  group_by(study_type) %>% 
-  summarize(N = n())
-
-p1 <- p1 %>% 
-  arrange(desc(study_type)) %>%
-  mutate(prop = round(N / sum(N) *100),0) %>%
-  mutate(ypos = cumsum(prop)- 0.5*prop )
-
-ggplot(p1, aes(x="", y=N, fill=reorder(study_type, N))) +
-  geom_bar(stat="identity", width=1, color="grey") +
-  geom_text(aes(x=1.3, label = paste0(prop, "%")), 
-            position = position_stack(vjust = 0.5), 
-            size = 3, color = "black")+
-  coord_polar("y", start=0) +
-  scale_fill_brewer(palette="Set2")+
-  labs(title = "By Study Type: Academic Literature \non Racial and Ethnic Disparities in \nReproductive Medicine in the US",
-       subtitle = "30DayChartChallenge Day 1: Fractions",
-       fill = "Study Type")+
-  hrbrthemes::theme_ipsum_pub()
-
+df <- mtg_cards %>% 
+  #filter(rarity %in% c("Common", "Mythic", "Rare", "Uncommon"))%>%
+  drop_na(rarity)%>%
+  group_by(rarity) %>% summarize(totcnt = n())%>% 
+  mutate(perc = totcnt/sum(totcnt))
 ```
 
+```{r}
+ggplot(df, aes(x = fct_reorder(rarity, desc(perc)), y = perc, fill = rarity)) +
+  #geom_segment(aes(x = rarity, xend = rarity, y = 0, yend = perc)) +
+  #geom_point(size = 4, pch = 21, bg = 4, col = 1) +
+  geom_bar(stat = "identity")+
+  scale_y_continuous(labels = scales::percent)+
+  labs(x = "", y = "",
+       fill = "Rarity",
+       title = "Magic the Gathering: The Most Common Card Type Is Rare?",
+       subtitle = "30DayChartChallenge, Day 1: Fractions",
+       caption = "Data source: Kaggle (Myles O'Neill)")+
+  
+  #scale_fill_manual(values = c("#c4d3ca", "#b3ceea", "#eb8b82", "#f8e7b9", "#a69f9d", "black")) +
+    scale_fill_manual(values = c("black", "#a69f9d", "#eb8b82", "#f8e7b9", "#b3ceea", "#c4d3ca")) +
+  coord_flip() +
+  theme_minimal()
+
+```
 
