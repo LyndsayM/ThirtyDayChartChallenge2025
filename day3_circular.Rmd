@@ -1,5 +1,5 @@
 ---
-title: "day1_fractions"
+title: "day3_circular"
 author: "Lyndsay Miles"
 date: "`r Sys.Date()`"
 output: html_document
@@ -71,17 +71,19 @@ p1 <- p1 %>%
   mutate(prop = round(N / sum(N) *100),0) %>%
   mutate(ypos = cumsum(prop)- 0.5*prop )
 
+
+
 ggplot(p1, aes(x="", y=N, fill=reorder(study_type, N))) +
   geom_bar(stat="identity", width=1, color="grey") +
   geom_text(aes(x=1.3, label = paste0(prop, "%")), 
             position = position_stack(vjust = 0.5), 
-            size = 3, color = "black")+
+            size = 2, color = "black")+
   coord_polar("y", start=0) +
   scale_fill_brewer(palette="Set2")+
-  labs(title = "By Study Type: Academic Literature \non Racial and Ethnic Disparities in \nReproductive Medicine in the US",
-       subtitle = "30DayChartChallenge Day 1: Fractions",
-       fill = "Study Type")
-
+  labs(title = "Study Types Represented in Academic Literature \non Racial and Ethnic Disparities in Reproductive\nMedicine in the United States, 2010-2023",
+       caption = "Author: Lyndsay Miles | Source: TidyTuesday",
+       fill = "Study Type")+
+  theme(plot.caption = element_text(hjust = 0)) 
 ```
 
 
