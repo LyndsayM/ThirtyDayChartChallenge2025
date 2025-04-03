@@ -1,0 +1,127 @@
+---
+title: "day2_fractions"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(hrbrthemes)
+library(fontawesome)
+
+pkg_themes <- getNamespaceExports("hrbrthemes")
+pkg_themes <- sort(pkg_themes[grepl("^theme\\_", pkg_themes)])
+
+glue::glue("- `{pkg_themes}()`")
+```
+
+```{r}
+# Option 2: Read directly from GitHub
+
+longbeach <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-03-04/longbeach.csv')
+```
+
+```{r}
+library(tidyverse)
+library(devtools)
+library(ggplot2)
+#install.packages("networkD3")
+library(networkD3)
+```
+
+```{r}
+df <- longbeach %>%
+  mutate_if(sapply(df, is.character), as.factor)
+
+df <- df %>% 
+  mutate(intake_year = year(ymd(intake_date)))%>%
+  drop_na(outcome_type)
+```
+    
+```{r}
+#number intake by animal type and year
+df_dog <- df %>% 
+  filter(animal_type %in% "dog")
+
+df_dog %>%
+  group_by(intake_type) %>% 
+  summarise(N = n())%>% 
+  arrange(desc(N))
+
+unique(df_dog$intake_type) #12 types
+unique(df_dog$outcome_type) #18 types
+
+#stray, owner surrender, welfare seized, confiscate, return
+```
+
+```{r}
+install.packages("CGPfunctions")
+library(CGPfunctions)
+library(ggthemes)
+
+```
+#day2 | slope | 30DayChartChallenge
+Today I explored the Long Beach Animal Shelter data set available from #TidyTuesday. The newggslopegraph() function from the #CGPfunctions R package made this a fun project.
+
+```{r}
+df_17_24 <- df %>% 
+  filter(
+    intake_year %in% c(2017, 2020, 2024),
+         intake_type %in% c("stray", "owner surrender", "welfare seized"))%>%
+  group_by(intake_type, intake_year) %>% 
+  summarize(tot_count = n())%>%
+  mutate(intake_year = as.factor(intake_year),
+         intake_type = as.factor(intake_type))
+
+#https://r-charts.com/evolution/newggslopegraph/
+newggslopegraph(dataframe = df_17_24,
+                Times = intake_year,
+                Measurement = tot_count,
+                Grouping = intake_type,
+                DataLabelPadding = 0.2,
+                DataLabelLineSize = 0.5,
+                #DataLabelFillColor = "lightblue",
+                XTextSize = 16,    # Size of the times
+                YTextSize = 2,     # Size of the groups
+                TitleTextSize = 14,
+                SubTitleTextSize = 12,
+                CaptionTextSize = 10,
+                TitleJustify = "right",
+                SubTitleJustify = "right",
+                CaptionJustify = "left",
+                LineThickness = 1.0,
+                LineColor = 4,
+                DataTextSize = 2,
+                Title = "Top 3 Reasons for Intake at\nLong Beach Animal Shelter",
+                SubTitle = "2017-2024",
+                Caption = "Author: Lyndsay Miles | Source: TidyTuesday",
+                ThemeChoice = "wsj")
+```
+
+
+what is needed: at least 3 columns: x: Times (intake_year), y: measurement (tot_count), and also grouping (intake_type)
+```{r}
+
+```
+
+
+```{r}
+#ggplot(df, aes(x = fct_reorder(rarity, desc(perc)), y = perc, fill = rarity)) +
+  #geom_segment(aes(x = rarity, xend = rarity, y = 0, yend = perc)) +
+  #geom_point(size = 4, pch = 21, bg = 4, col = 1) +
+ # geom_bar(stat = "identity")+
+#  scale_y_continuous(labels = scales::percent)+
+ # labs(x = "", y = "",
+  #     fill = "Rarity",
+   #    title = "Magic the Gathering: The Most Common Card Type Is Rare?",
+    #   subtitle = "30DayChartChallenge, Day 1: Fractions",
+  #     caption = "Data source: Kaggle (Myles O'Neill)")+
+
+#    scale_fill_manual(values = c("black", "#a69f9d", "#eb8b82", "#f8e7b9", "#b3ceea", "#c4d3ca")) +
+ # coord_flip() +
+  #theme_minimal()
+
+```
+
