@@ -14,6 +14,7 @@ library(readr)
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
+library(ggthemes)
 ```
 
 ```{r}
@@ -29,7 +30,7 @@ df_clean <- df %>%
   pivot_longer(cols= c("Disease", "Wounds", "Other"),
     names_to = c("Deaths"),
     values_to = "count")%>%
-  mutate(if_disease = if_else(Deaths == "Disease", "disease", "not disease"))
+  mutate(if_disease = if_else(Deaths == "Disease", "Disease", "Non-Disease"))
 
 df_clean_d <- df_clean %>% 
   group_by(Date, if_disease) %>% 
@@ -45,9 +46,16 @@ df_clean_d_plot <- df_clean_d %>%
 ggplot(df_clean_d_plot, aes(x = month, y = tot, fill= if_disease)) + 
   geom_bar(stat = "identity") + 
   scale_x_date(NULL, date_labels = "%b %y", breaks = "month")+
-  labs(y = "")+
-  theme_grey()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
+  scale_fill_manual(values = c("blue", "red"))+
+  labs(y = "",
+       fill = "",
+       title = "Deaths Due to Disease and Non-Disease Causes",
+       subtitle = "Crimean War, March 1854-April 1856",
+       caption = "Author: Lyndsay Miles | Source: Kaggle")+
+  theme_economist()+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, size = 10))+
+  geom_text(x=as.Date("1855-05-01"), y=2900, label="Sanitary Commission\nBegins", size = 3)+
+  geom_vline(xintercept = as.numeric(as.Date("1855-03-01")), linetype=3)
+#A much more impressive example of this chart: https://community.storytellingwithdata.com/challenges/mar-2023-remake-a-famous-graph/redo-of-florence-nightingales-rose-diagram-divergi  
 ```
 
