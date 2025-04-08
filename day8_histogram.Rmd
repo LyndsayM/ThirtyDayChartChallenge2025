@@ -1,0 +1,73 @@
+---
+title: "day8_histogram"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#https://github.com/rfordatascience/tidytuesday/blob/main/data/2025/2025-04-08/readme.md
+care_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-04-08/care_state.csv')
+```
+
+```{r}
+care_state %>% 
+  group_by(condition, measure_id) %>% drop_na(score) %>% 
+  summarize(avg_score = mean(score))%>% 
+  arrange(condition, avg_score)
+```
+
+
+```{r}
+care_state_hcpvacc <- 
+care_state %>% 
+  filter(condition %in% "Healthcare Personnel Vaccination")%>% 
+  mutate(measure_id = if_else(measure_id == "HCP_COVID_19", "COVID-19", "Influenza"))
+
+care_state_hcpvacc %>% 
+ggplot(aes(x=score, fill = measure_id))+ 
+  geom_histogram(bins = 15)+
+  labs(title = "A tale of two vaccines",
+  subtitle = "Percent of U.S. healthcare personnel vaccinated, October 2023-March 2024",
+       fill = "Immunization type",
+       x = "",
+       y = "",
+       caption = "Author: Lyndsay Miles | Source: TidyTuesday/CMS")+
+  scale_fill_manual(values = c("#6ed48f", "#001f90"))+
+  ggthemes::theme_fivethirtyeight()
+
+#IMM_3: Healthcare workers given influenza vaccination Higher percentages are better
+#HCP_COVID_19: Percentage of healthcare personnel who are up to date with COVID-19 vaccinations
+#Takeaway: Doing a better job getting Flu vaccines than COVID_19 vaccines. This might speak to a number of things, including access to different vaccines (access to flu may be higher than covid_19), and acceptability (flu vaccine may be more acceptable than covid_19 vaccine) - A tale of two vaccines - 
+
+
+ 
+```
+
+
+```{r}
+library(scales)
+#p1 <- ggplot(data = cia_factbook, aes(x=infant_mortality_rate, y= population_growth_rate, label = label_name))+
+#  geom_point()+
+ # geom_text(size = 3, hjust = 0.75, vjust = -0.5)+
+#  labs(title = "Infant Mortality Outliers",
+ #      x = "Infant mortality rate",
+  #     y = "Population growth rate",
+   #    subtitle = "CIA Factbook Country Comparison, 2014",
+    #   caption = "Author: Lyndsay Miles\nSources: CIA Factbook/TidyTuesday")+
+  #hrbrthemes::theme_modern_rc()+
+  #theme(legend.position = "bottom")
+#p1
+```
+
+
+
