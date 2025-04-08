@@ -1,4 +1,4 @@
-# ThirtyDayChartChallenge2025
+# Thirty Day Chart Challenge 2025
 A repository of the code and images from my contributions to the 2025 30 Day Chart Challenge (https://github.com/30DayChartChallenge/Edition2025).
 
 Analysis was conducted in R. Data sources used in these projects is noted in each project's R Markdown file. Most data was sourced from Kaggle or TidyTuesday project.
