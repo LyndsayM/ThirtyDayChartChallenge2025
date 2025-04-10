@@ -1,0 +1,52 @@
+---
+title: "day10_multimodal"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(RColorBrewer)
+```
+
+```{r}
+#add data
+df <- readr::read_csv("data/Weekly_COVID-19_Vaccination_Coverage_Among_Pregnant_Women_18-49_Years__by_Race_and_Ethnicity_20250410.csv")
+#Percent: The vaccination coverage percentage for pregnant women aged 18-49 years
+#https://data.cdc.gov/Pregnancy-Vaccination/Weekly-COVID-19-Vaccination-Coverage-among-Pregnan/efqg-e273/about_data
+```
+
+```{r}
+#remove groups - overall, unknown, multiple/other
+vector <- c("Overall", "Unknown", "Multiple/Other, NH")
+
+#clean data
+df_clean <- df %>% 
+  filter(!`Race and Ethnicity` %in% vector)
+
+#find means
+df_clean %>% 
+  group_by(`COVID-19 Season`)%>% 
+  summarise(grp_mean = mean(Percent))
+```
+
+
+```{r}
+ggplot(data = df_clean, aes(x=Percent, fill = `Race and Ethnicity`))+
+  geom_density(alpha = 0.5)+
+  facet_wrap(~`COVID-19 Season`)+
+  labs(title = "COVID-19 Vaccination Coverage (%) of \nPregnant Women in the U.S., Aged 18-49 Years",
+       caption = "Author: Lyndsay Miles\nData: National Center for Immunization and Respiratory Diseases (NCIRD)")+
+  ggthemes::theme_fivethirtyeight()+
+  scale_fill_brewer(type = "qual", palette = 2)
+
+
+```
+
+
