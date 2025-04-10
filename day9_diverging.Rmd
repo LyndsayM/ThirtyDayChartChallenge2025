@@ -1,0 +1,72 @@
+---
+title: "day9_diverging"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#https://github.com/rfordatascience/tidytuesday/blob/main/data/2025/2025-04-08/readme.md
+care_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-04-08/care_state.csv')
+```
+
+```{r}
+care_state %>% 
+  group_by(measure_id) %>% drop_na(score) %>% 
+  summarize(avg_score = mean(score))%>% 
+  arrange(avg_score)
+#IMM_3: 80.8
+```
+
+```{r}
+#calculate divergence from the avg_score
+#add census division for states
+care_state_div <- care_state %>% 
+  filter(measure_id %in% "IMM_3") %>%
+  mutate(div_avg = score - 80.8)%>%
+  mutate(census_div = case_when(state %in% c("CT", "ME", "MA", "NH", "RI", "VT") ~ "New England",
+                                state %in% c("NJ", "NY", "PA") ~ "Mid-Atlantic",
+                                state %in% c("IL", "IN", "MI", "OH", "WI") ~ "East North Central",
+                                state %in% c("IA", "KS", "MN", "MO", "NE", "ND", "SD") ~ "West North Central",
+                                state %in% c("DE", "DC", "FL", "GA", "MD", "NC", "SC", "VA", "WV") ~ "South Atlantic",
+                                state %in% c("AL", "KY", "MS", "TN") ~ "East South Central",
+                                state %in% c("AR", "LA", "OK", "TX") ~ "West South Central",
+                                state %in% c("AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY") ~ "Mountain",
+                                state %in% c("AK", "CA", "HI", "OR", "WA") ~ "Pacific",
+                                .default = NULL),
+         census_div = as_factor(census_div))
+```
+
+```{r}
+care_state_div_plot <- care_state_div %>% 
+  drop_na(score)%>%
+  group_by(census_div)%>%
+  summarize(mean_score = round(mean(score),0))%>%
+  mutate(mean_score_label = paste0(sprintf("%d", mean_score), "%"))%>%
+  mutate(div_score = mean_score-80.8) %>%
+  drop_na(census_div)
+```
+
+```{r}
+ggplot(data = care_state_div_plot, aes(x=reorder(census_div, div_score), y=div_score, label = mean_score_label)) +
+  geom_bar(stat="identity")+
+  labs(title = "Divergence from National Average (80.8%)\nOf Healthcare Personnel Vaccinated",
+  subtitle = " by U.S. Census Division (October 2023 - March 2024)",
+       y = "", x = "",
+  caption = "Author: Lyndsay Miles | Source: TidyTuesday/CMS")  +
+  geom_text(aes(label = mean_score_label ,y = 0, x = census_div, 
+                             vjust = ifelse(div_score >= 0, 0.5, 0.5),
+                             hjust = ifelse(div_score>= 0, 1.05, -0.05)),
+                size =3)+
+  ggthemes::theme_tufte()+
+  coord_flip()
+```
