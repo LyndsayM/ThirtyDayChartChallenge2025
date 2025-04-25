@@ -1,0 +1,42 @@
+---
+title: "WHO Day: Measles"
+author: "Lyndsay Miles"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(RColorBrewer)
+library(lubridate)
+```
+
+```{r}
+df <- readxl::read_excel("data/measles_vacc_coverage.xlsx", sheet =1)
+```
+
+```{r}
+df_clean <- df %>% select(CODE, NAME, YEAR, ANTIGEN, COVERAGE) %>%
+  mutate(NAME = as_factor(NAME),
+    my_year = as.Date(as.character(YEAR), format = "%Y"),
+         my_year4 = year(my_year)) %>% select(-c(YEAR, my_year))%>%
+  drop_na(ANTIGEN, NAME)
+
+```
+
+```{r}
+df_clean %>% 
+  filter(ANTIGEN == "MCV2")%>%
+  ggplot(aes(x=my_year4, y = COVERAGE, color = NAME, group = NAME)) +
+  geom_line(size = 1.1, alpha = 0.75)+
+  scale_y_continuous(labels = function(x) paste0(x*1, "%")) +
+  scale_color_manual(values = c("#e27c7c", "#599e94", "#6cd4c5","#466964", "#a86464", "#6d4b4b"))+
+  labs(title = "Measles 2-Dose Vaccine Coverage by WHO Region",
+       subtitle = "Significant Coverage Increase in Western Pacific Since 2000",
+       caption = "Author: Lyndsay Miles | Source: World Health Organization",
+       x = "", y = "", color = "")+
+  ggthemes::theme_calc()
+```
+
